@@ -5,17 +5,17 @@ import java.sql.DriverManager;
 import java.sql.SQLException;
 
 public class ConexionDB {
-    
+
     // Instancia única (Singleton)
     private static Connection conexion = null;
-    
-    // Credenciales de tu SQL Server local
-    private static final String HOST = "localhost";
-    private static final String PUERTO = "1433";
-    private static final String BD = "HollysBakingDB";
-    private static final String USUARIO = "sa"; // Cambia esto si usas otro usuario
-    private static final String CLAVE = "123456"; // Pon tu clave real de SQL Server
-    
+
+    // Variables de entorno de Railway (o valores locales para desarrollo)
+    private static final String HOST = System.getenv().getOrDefault("PGHOST", "localhost");
+    private static final String PUERTO = System.getenv().getOrDefault("PGPORT", "5432");
+    private static final String BD = System.getenv().getOrDefault("PGDATABASE", "HollysBakingDB");
+    private static final String USUARIO = System.getenv().getOrDefault("PGUSER", "postgres");
+    private static final String CLAVE = System.getenv().getOrDefault("PGPASSWORD", "123456");
+
     // Constructor privado para evitar que creen objetos con "new"
     private ConexionDB() {
     }
@@ -23,27 +23,27 @@ public class ConexionDB {
     public static Connection getConexion() {
         try {
             if (conexion == null || conexion.isClosed()) {
-                // Registrar el driver
-                Class.forName("com.microsoft.sqlserver.jdbc.SQLServerDriver");
-                
-                // Construir la URL
-                String url = "jdbc:sqlserver://" + HOST + ":" + PUERTO + 
-                             ";databaseName=" + BD + 
-                             ";encrypt=true;trustServerCertificate=true;";
-                
+                // Registrar el driver de PostgreSQL
+                Class.forName("org.postgresql.Driver");
+
+                // Construir la URL de PostgreSQL
+                String url = "jdbc:postgresql://" + HOST + ":" + PUERTO + "/" + BD;
+
                 // Abrir la conexión
                 conexion = DriverManager.getConnection(url, USUARIO, CLAVE);
-                System.out.println("Conexión a SQL Server exitosa.");
+                System.out.println("Conexión a PostgreSQL exitosa.");
             }
         } catch (ClassNotFoundException e) {
-            System.out.println("Error: No se encontró el driver JDBC de SQL Server.");
+            System.out.println("Error: No se encontró el driver JDBC de PostgreSQL.");
+            e.printStackTrace();
         } catch (SQLException e) {
             System.out.println("Error de conexión SQL: " + e.getMessage());
+            e.printStackTrace();
         }
-        
+
         return conexion;
     }
-    
+
     // Método para cerrar la conexión cuando ya no se use
     public static void cerrarConexion() {
         try {
