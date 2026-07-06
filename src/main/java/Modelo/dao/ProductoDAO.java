@@ -11,12 +11,9 @@ import java.util.function.Function;
 import Modelo.conexion.ConexionDB;
 import Modelo.entidades.Producto;
 
-/**
- * DAO de Producto con programacion funcional (extiende GenericDAO)
- */
 public class ProductoDAO extends GenericDAO<Producto> {
     
-    // Lambda: mapea ResultSet -> Producto (PROGRAMACION FUNCIONAL)
+    // Lambda: mapea ResultSet -> Producto
     private final Function<ResultSet, Producto> mapper = rs -> {
         try {
             Producto p = new Producto();
@@ -29,7 +26,6 @@ public class ProductoDAO extends GenericDAO<Producto> {
             p.setCategoria(rs.getString("categoria"));
             p.setImagen(rs.getBytes("imagen"));
             
-            // Auditoria
             if (rs.getTimestamp("fecha_creacion") != null) {
                 p.setFechaCreacion(rs.getTimestamp("fecha_creacion").toLocalDateTime());
             }
@@ -41,7 +37,6 @@ public class ProductoDAO extends GenericDAO<Producto> {
         }
     };
     
-    // Consultas usando GenericDAO (programacion funcional)
     public List<Producto> listarProductos() {
         String sql = "SELECT * FROM Productos";
         return consultarLista(sql, mapper);
@@ -57,13 +52,11 @@ public class ProductoDAO extends GenericDAO<Producto> {
         return consultarUno(sql, mapper, id);
     }
     
-    // Buscador por nombre (para el catalogo)
     public List<Producto> buscarPorNombre(String nombre) {
         String sql = "SELECT * FROM Productos WHERE LOWER(nombre_producto) LIKE LOWER(?)";
         return consultarLista(sql, mapper, "%" + nombre + "%");
     }
     
-    // Obtener categorias distintas (sin lambda compleja)
     public List<String> obtenerCategorias() {
         String sql = "SELECT DISTINCT categoria FROM Productos WHERE categoria IS NOT NULL";
         List<String> categorias = new ArrayList<>();
@@ -83,7 +76,6 @@ public class ProductoDAO extends GenericDAO<Producto> {
         return categorias;
     }
     
-    // Contar productos (para el dashboard)
     public int contarProductos() {
         String sql = "SELECT COUNT(*) as total FROM Productos";
         
@@ -102,29 +94,30 @@ public class ProductoDAO extends GenericDAO<Producto> {
         return 0;
     }
     
-    // Insertar con auditoria
     public boolean insertarProducto(Producto p, String usuarioResponsable) {
-    String sql = "INSERT INTO Productos (nombre_producto, descripcion, precio_venta, stock, estado_stock, categoria, imagen) " +
-                 "VALUES (?, ?, ?, ?, ?, ?, ?)";
-    
-    try {
-        boolean resultado = ejecutarActualizacion(sql,
+        String sql = "INSERT INTO Productos (nombre_producto, descripcion, precio_venta, stock, estado_stock, categoria, imagen, fecha_creacion, usuario_creacion) " +
+                     "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
+        
+        return ejecutarActualizacion(sql,
             p.getNombreProducto(),
             p.getDescripcion(),
             p.getPrecioVenta(),
             p.getStock(),
             p.isEstadoStock(),
             p.getCategoria(),
-            p.getImagen()  // Puede ser null, PostgreSQL lo acepta
+            p.getImagen(),
+            LocalDateTime.now(),
+            usuarioResponsable
         );
-        
-        System.out.println("Insert resultado: " + resultado);
-        return resultado;
-        
-    } catch (Exception e) {
-        System.out.println("Error en insertarProducto: " + e.getMessage());
-        e.printStackTrace();
-        return false;
     }
-}
+    
+    public boolean insertarProducto(Producto p) {
+        return insertarProducto(p, "sistema");
+    }
+    
+    // METODO ELIMINAR - ESTE ES EL QUE FALTABA
+    public boolean eliminarProducto(int id) {
+        String sql = "DELETE FROM Productos WHERE id_producto = ?";
+        return ejecutarActualizacion(sql, id);
+    }
 }
