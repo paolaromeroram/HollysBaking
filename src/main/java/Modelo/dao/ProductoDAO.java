@@ -1,12 +1,15 @@
 package Modelo.dao;
 
+import java.sql.Connection;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Function;
+import Modelo.conexion.ConexionDB;
 import Modelo.entidades.Producto;
-import java.util.ArrayList;
 
 /**
  * DAO de Producto con programacion funcional (extiende GenericDAO)
@@ -60,26 +63,44 @@ public class ProductoDAO extends GenericDAO<Producto> {
         return consultarLista(sql, mapper, "%" + nombre + "%");
     }
     
-    // Obtener categorias distintas
-   // Obtener categorias distintas
-public List<String> obtenerCategorias() {
-    String sql = "SELECT DISTINCT categoria FROM Productos WHERE categoria IS NOT NULL";
-    List<String> categorias = new ArrayList<>();
-    
-    try (java.sql.Connection con = Modelo.conexion.ConexionDB.getConexion();
-         java.sql.PreparedStatement ps = con.prepareStatement(sql);
-         java.sql.ResultSet rs = ps.executeQuery()) {
+    // Obtener categorias distintas (sin lambda compleja)
+    public List<String> obtenerCategorias() {
+        String sql = "SELECT DISTINCT categoria FROM Productos WHERE categoria IS NOT NULL";
+        List<String> categorias = new ArrayList<>();
         
-        while (rs.next()) {
-            categorias.add(rs.getString("categoria"));
+        try (Connection con = ConexionDB.getConexion();
+             PreparedStatement ps = con.prepareStatement(sql);
+             ResultSet rs = ps.executeQuery()) {
+            
+            while (rs.next()) {
+                categorias.add(rs.getString("categoria"));
+            }
+            
+        } catch (SQLException e) {
+            e.printStackTrace();
         }
         
-    } catch (java.sql.SQLException e) {
-        e.printStackTrace();
+        return categorias;
     }
     
-    return categorias;
-}
+    // Contar productos (para el dashboard)
+    public int contarProductos() {
+        String sql = "SELECT COUNT(*) as total FROM Productos";
+        
+        try (Connection con = ConexionDB.getConexion();
+             PreparedStatement ps = con.prepareStatement(sql);
+             ResultSet rs = ps.executeQuery()) {
+            
+            if (rs.next()) {
+                return rs.getInt("total");
+            }
+            
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        
+        return 0;
+    }
     
     // Insertar con auditoria
     public boolean insertarProducto(Producto p, String usuarioResponsable) {
@@ -109,18 +130,4 @@ public List<String> obtenerCategorias() {
         String sql = "DELETE FROM Productos WHERE id_producto = ?";
         return ejecutarActualizacion(sql, id);
     }
-    // Contar productos (para el dashboard)
-public int contarProductos() {
-    String sql = "SELECT COUNT(*) as total FROM Productos";
-    try (java.sql.Connection con = Modelo.conexion.ConexionDB.getConexion();
-         java.sql.PreparedStatement ps = con.prepareStatement(sql);
-         java.sql.ResultSet rs = ps.executeQuery()) {
-        if (rs.next()) {
-            return rs.getInt("total");
-        }
-    } catch (java.sql.SQLException e) {
-        e.printStackTrace();
-    }
-    return 0;
-}
 }
