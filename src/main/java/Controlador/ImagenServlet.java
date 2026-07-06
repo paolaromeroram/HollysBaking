@@ -38,7 +38,7 @@ public class ImagenServlet extends HttpServlet {
             e.printStackTrace();
         }
         
-        // Imagen por defecto si no hay
+        // Imagen por defecto
         response.sendRedirect("https://via.placeholder.com/80?text=Sin+Imagen");
     }
 }

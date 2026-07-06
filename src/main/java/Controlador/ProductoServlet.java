@@ -23,62 +23,79 @@ import org.apache.commons.io.IOUtils;
 public class ProductoServlet extends HttpServlet {
 
     @Override
-    protected void doGet(HttpServletRequest request, HttpServletResponse response)
-            throws ServletException, IOException {
-        
-        ProductoDAO dao = new ProductoDAO();
-        List<Producto> lista = dao.listarProductos();
-        
-        request.setAttribute("listaProductos", lista);
-        request.getRequestDispatcher("productos.jsp").forward(request, response);
-    }
-
-    @Override
-    protected void doPost(HttpServletRequest request, HttpServletResponse response)
-            throws ServletException, IOException {
-        
-        request.setCharacterEncoding("UTF-8");
-        
-        try {
-            String nombre = request.getParameter("nombre");
-            String descripcion = request.getParameter("descripcion");
-            String precioStr = request.getParameter("precio");
-            String categoria = request.getParameter("categoria");
-            
-            // Procesar imagen
-            Part imagenPart = request.getPart("imagen");
-            byte[] imagenBytes = null;
-            
-            if (imagenPart != null && imagenPart.getSize() > 0) {
-                InputStream inputStream = imagenPart.getInputStream();
-                imagenBytes = IOUtils.toByteArray(inputStream);
-            }
-            
-            double precio = Double.parseDouble(precioStr);
-            
-            Producto p = new Producto();
-            p.setNombreProducto(nombre);
-            p.setDescripcion(descripcion);
-            p.setPrecioVenta(precio);
-            p.setStock(0);
-            p.setEstadoStock(true);
-            p.setCategoria(categoria);
-            p.setImagen(imagenBytes);
-            
-            ProductoDAO dao = new ProductoDAO();
-            boolean exito = dao.insertarProducto(p);
-            
+protected void doGet(HttpServletRequest request, HttpServletResponse response)
+        throws ServletException, IOException {
+    
+    String accion = request.getParameter("accion");
+    ProductoDAO dao = new ProductoDAO();
+    
+    // Si es eliminar
+    if ("eliminar".equals(accion)) {
+        String idStr = request.getParameter("id");
+        if (idStr != null) {
+            int id = Integer.parseInt(idStr);
+            boolean exito = dao.eliminarProducto(id);
             if (exito) {
-                request.setAttribute("mensaje", "✅ Producto guardado correctamente");
+                request.setAttribute("mensaje", "✅ Producto eliminado correctamente");
             } else {
-                request.setAttribute("error", "❌ No se pudo guardar el producto");
+                request.setAttribute("error", "❌ No se pudo eliminar el producto");
             }
-            
-        } catch (Exception e) {
-            request.setAttribute("error", "❌ Error: " + e.getMessage());
-            e.printStackTrace();
+        }
+    }
+    
+    // Listar productos
+    List<Producto> lista = dao.listarProductos();
+    request.setAttribute("listaProductos", lista);
+    request.getRequestDispatcher("productos.jsp").forward(request, response);
+}
+
+   @Override
+protected void doPost(HttpServletRequest request, HttpServletResponse response)
+        throws ServletException, IOException {
+    
+    request.setCharacterEncoding("UTF-8");
+    
+    try {
+        String nombre = request.getParameter("nombre");
+        String descripcion = request.getParameter("descripcion");
+        String precioStr = request.getParameter("precio");
+        String categoria = request.getParameter("categoria");
+        
+        // Procesar imagen
+        Part imagenPart = request.getPart("imagen");
+        byte[] imagenBytes = null;
+        
+        if (imagenPart != null && imagenPart.getSize() > 0) {
+            InputStream inputStream = imagenPart.getInputStream();
+            imagenBytes = inputStream.readAllBytes();
         }
         
-        doGet(request, response);
+        double precio = Double.parseDouble(precioStr);
+        
+        Producto p = new Producto();
+        p.setNombreProducto(nombre);
+        p.setDescripcion(descripcion);
+        p.setPrecioVenta(precio);
+        p.setStock(0);
+        p.setEstadoStock(true);
+        p.setCategoria(categoria);
+        p.setImagen(imagenBytes);
+        
+        ProductoDAO dao = new ProductoDAO();
+        boolean exito = dao.insertarProducto(p);
+        
+        if (exito) {
+            request.setAttribute("mensaje", "✅ Producto guardado correctamente");
+        } else {
+            request.setAttribute("error", "❌ No se pudo guardar el producto");
+        }
+        
+    } catch (Exception e) {
+        request.setAttribute("error", "❌ Error: " + e.getMessage());
+        e.printStackTrace();
     }
+    
+    doGet(request, response);
+}
+    
 }

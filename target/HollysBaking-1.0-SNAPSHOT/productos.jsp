@@ -135,55 +135,63 @@
 
             <!-- Tabla con Imagen -->
             <table class="table table-striped table-hover shadow-sm bg-white">
-                <thead class="table-dark">
-                    <tr>
-                        <th>ID</th>
-                        <th>Imagen</th>
-                        <th>Nombre</th>
-                        <th>Descripción</th>
-                        <th>Precio</th>
-                        <th>Categoría</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <% 
-                        List<Producto> lista = (List<Producto>) request.getAttribute("listaProductos");
-                        if(lista != null && !lista.isEmpty()) {
-                            for(Producto p : lista) {
-                    %>
-                    <tr>
-                        <td><%= p.getIdProducto() %></td>
-                        <td>
-                            <% if(p.getImagen() != null) { %>
-                                <img src="ImagenServlet?id=<%= p.getIdProducto() %>" 
-                                     alt="<%= p.getNombreProducto() %>" 
-                                     class="producto-img">
-                            <% } else { %>
-                                <div class="sin-imagen">🍰</div>
-                            <% } %>
-                        </td>
-                        <td><%= p.getNombreProducto() %></td>
-                        <td><%= p.getDescripcion() != null ? p.getDescripcion() : "-" %></td>
-                        <td>S/ <%= p.getPrecioVenta() %></td>
-                        <td>
-                            <% if("Dulce".equals(p.getCategoria())) { %>
-                                <span class="badge bg-pink">🍰 Dulce</span>
-                            <% } else if("Salada".equals(p.getCategoria())) { %>
-                                <span class="badge bg-brown">🥖 Salada</span>
-                            <% } else { %>
-                                <span class="badge bg-secondary">Sin categoría</span>
-                            <% } %>
-                        </td>
-                    </tr>
-                    <% 
-                            }
-                        } else {
-                    %>
-                    <tr>
-                        <td colspan="6" class="text-center text-muted">No hay productos registrados</td>
-                    </tr>
-                    <% } %>
-                </tbody>
+               <thead class="table-dark">
+    <tr>
+        <th>ID</th>
+        <th>Imagen</th>
+        <th>Nombre</th>
+        <th>Descripción</th>
+        <th>Precio</th>
+        <th>Categoría</th>
+        <th>Acciones</th>  <!-- NUEVA COLUMNA -->
+    </tr>
+</thead>
+<tbody>
+    <% 
+        List<Producto> lista = (List<Producto>) request.getAttribute("listaProductos");
+        if(lista != null && !lista.isEmpty()) {
+            for(Producto p : lista) {
+    %>
+    <tr>
+        <td><%= p.getIdProducto() %></td>
+        <td>
+            <% if(p.getImagen() != null) { %>
+                <img src="ImagenServlet?id=<%= p.getIdProducto() %>" 
+                     alt="<%= p.getNombreProducto() %>" 
+                     style="width: 80px; height: 80px; object-fit: cover; border-radius: 8px;">
+            <% } else { %>
+                <div style="width: 80px; height: 80px; background: #f0f0f0; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 24px;">🍰</div>
+            <% } %>
+        </td>
+        <td><%= p.getNombreProducto() %></td>
+        <td><%= p.getDescripcion() != null ? p.getDescripcion() : "-" %></td>
+        <td>S/ <%= p.getPrecioVenta() %></td>
+        <td>
+            <% if("Dulce".equals(p.getCategoria())) { %>
+                <span class="badge bg-pink">🍰 Dulce</span>
+            <% } else if("Salada".equals(p.getCategoria())) { %>
+                <span class="badge bg-brown">🥖 Salada</span>
+            <% } else { %>
+                <span class="badge bg-secondary">Sin categoría</span>
+            <% } %>
+        </td>
+        <td>  <!-- NUEVA COLUMNA: BOTÓN ELIMINAR -->
+            <a href="ProductoServlet?accion=eliminar&id=<%= p.getIdProducto() %>" 
+               class="btn btn-danger btn-sm"
+               onclick="return confirm('¿Estás seguro de eliminar este producto?')">
+                🗑️ Eliminar
+            </a>
+        </td>
+    </tr>
+    <% 
+            }
+        } else {
+    %>
+    <tr>
+        <td colspan="7" class="text-center text-muted">No hay productos registrados</td>
+    </tr>
+    <% } %>
+</tbody> 
             </table>
         </main>
     </div>
