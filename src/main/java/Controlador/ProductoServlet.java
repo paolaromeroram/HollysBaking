@@ -1,16 +1,25 @@
-package Controlador;
+package controlador;
 
 import jakarta.servlet.ServletException;
+import jakarta.servlet.annotation.MultipartConfig;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.Part;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.List;
 import Modelo.dao.ProductoDAO;
 import Modelo.entidades.Producto;
+import org.apache.commons.io.IOUtils;
 
 @WebServlet(name = "ProductoServlet", urlPatterns = {"/ProductoServlet"})
+@MultipartConfig(
+    fileSizeThreshold = 1024 * 1024,  // 1 MB
+    maxFileSize = 1024 * 1024 * 5,     // 5 MB
+    maxRequestSize = 1024 * 1024 * 10  // 10 MB
+)
 public class ProductoServlet extends HttpServlet {
 
     @Override
@@ -21,7 +30,6 @@ public class ProductoServlet extends HttpServlet {
         List<Producto> lista = dao.listarProductos();
         
         request.setAttribute("listaProductos", lista);
-        // CORREGIDO: El JSP se llama productos.jsp (no gestion_productos.jsp)
         request.getRequestDispatcher("productos.jsp").forward(request, response);
     }
 
@@ -33,24 +41,32 @@ public class ProductoServlet extends HttpServlet {
         
         try {
             String nombre = request.getParameter("nombre");
+            String descripcion = request.getParameter("descripcion");
             String precioStr = request.getParameter("precio");
+            String categoria = request.getParameter("categoria");
             
-            System.out.println("=== DATOS RECIBIDOS ===");
-            System.out.println("Nombre: [" + nombre + "]");
-            System.out.println("Precio: [" + precioStr + "]");
+            // Procesar imagen
+            Part imagenPart = request.getPart("imagen");
+            byte[] imagenBytes = null;
             
-            // Validación
-            if (nombre == null || nombre.trim().isEmpty() ||
-                precioStr == null || precioStr.trim().isEmpty()) {
-                
-                request.setAttribute("error", "⚠️ Todos los campos son obligatorios");
-                doGet(request, response);  // CORREGIDO: usar forward, no redirect
-                return;
+            if (imagenPart != null && imagenPart.getSize() > 0) {
+                InputStream inputStream = imagenPart.getInputStream();
+                imagenBytes = IOUtils.toByteArray(inputStream);
             }
             
             double precio = Double.parseDouble(precioStr);
             
-Producto nuevo = new Producto(0, nombre.trim(), precio, null);            boolean exito = new ProductoDAO().insertarProducto(nuevo);
+            Producto p = new Producto();
+            p.setNombreProducto(nombre);
+            p.setDescripcion(descripcion);
+            p.setPrecioVenta(precio);
+            p.setStock(0);
+            p.setEstadoStock(true);
+            p.setCategoria(categoria);
+            p.setImagen(imagenBytes);
+            
+            ProductoDAO dao = new ProductoDAO();
+            boolean exito = dao.insertarProducto(p);
             
             if (exito) {
                 request.setAttribute("mensaje", "✅ Producto guardado correctamente");
@@ -58,15 +74,11 @@ Producto nuevo = new Producto(0, nombre.trim(), precio, null);            boolea
                 request.setAttribute("error", "❌ No se pudo guardar el producto");
             }
             
-        } catch (NumberFormatException e) {
-            request.setAttribute("error", "⚠️ El precio debe ser un número válido");
         } catch (Exception e) {
-            System.out.println("ERROR: " + e.getMessage());
-            e.printStackTrace();
             request.setAttribute("error", "❌ Error: " + e.getMessage());
+            e.printStackTrace();
         }
         
-        // CORREGIDO: Usar doGet en lugar de sendRedirect para mantener mensajes
         doGet(request, response);
     }
 }

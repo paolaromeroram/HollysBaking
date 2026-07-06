@@ -12,26 +12,30 @@ import Modelo.entidades.Producto;
 public class ProductoDAO {
 
     public List<Producto> listarProductos() {
-        List<Producto> lista = new ArrayList<>();
-        String sql = "SELECT id_producto, nombre_producto, precio_venta, categoria FROM Productos";
+    List<Producto> lista = new ArrayList<>();
+    String sql = "SELECT id_producto, nombre_producto, descripcion, precio_venta, stock, estado_stock, categoria, imagen FROM Productos";
+    
+    try (Connection con = ConexionDB.getConexion();
+         PreparedStatement ps = con.prepareStatement(sql);
+         ResultSet rs = ps.executeQuery()) {
         
-        try (Connection con = ConexionDB.getConexion();
-             PreparedStatement ps = con.prepareStatement(sql);
-             ResultSet rs = ps.executeQuery()) {
-            
-            while (rs.next()) {
-                Producto p = new Producto();
-                p.setIdProducto(rs.getInt("id_producto"));
-                p.setNombreProducto(rs.getString("nombre_producto"));
-                p.setPrecioVenta(rs.getDouble("precio_venta"));
-                p.setCategoria(rs.getString("categoria"));
-                lista.add(p);
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
+        while (rs.next()) {
+            Producto p = new Producto();
+            p.setIdProducto(rs.getInt("id_producto"));
+            p.setNombreProducto(rs.getString("nombre_producto"));
+            p.setDescripcion(rs.getString("descripcion"));
+            p.setPrecioVenta(rs.getDouble("precio_venta"));
+            p.setStock(rs.getInt("stock"));
+            p.setEstadoStock(rs.getBoolean("estado_stock"));
+            p.setCategoria(rs.getString("categoria"));
+            p.setImagen(rs.getBytes("imagen"));  // NUEVO
+            lista.add(p);
         }
-        return lista;
+    } catch (SQLException e) {
+        e.printStackTrace();
     }
+    return lista;
+}
     
     // NUEVO: Filtrar por categoría
     public List<Producto> listarPorCategoria(String categoria) {
@@ -83,21 +87,31 @@ public class ProductoDAO {
     }
     
     public boolean insertarProducto(Producto p) {
-        String sql = "INSERT INTO Productos (nombre_producto, precio_venta, categoria) VALUES (?, ?, ?)";
+    String sql = "INSERT INTO Productos (nombre_producto, descripcion, precio_venta, stock, estado_stock, categoria, imagen) VALUES (?, ?, ?, ?, ?, ?, ?)";
+    
+    try (Connection con = ConexionDB.getConexion();
+         PreparedStatement ps = con.prepareStatement(sql)) {
         
-        try (Connection con = ConexionDB.getConexion();
-             PreparedStatement ps = con.prepareStatement(sql)) {
-            
-            ps.setString(1, p.getNombreProducto());
-            ps.setDouble(2, p.getPrecioVenta());
-            ps.setString(3, p.getCategoria());
-            
-            return ps.executeUpdate() > 0;
-        } catch (SQLException e) {
-            e.printStackTrace();
-            return false;
+        ps.setString(1, p.getNombreProducto());
+        ps.setString(2, p.getDescripcion());
+        ps.setDouble(3, p.getPrecioVenta());
+        ps.setInt(4, p.getStock());
+        ps.setBoolean(5, p.isEstadoStock());
+        ps.setString(6, p.getCategoria());
+        
+        // NUEVO: Guardar imagen como BYTEA
+        if (p.getImagen() != null) {
+            ps.setBytes(7, p.getImagen());
+        } else {
+            ps.setNull(7, java.sql.Types.BINARY);
         }
+        
+        return ps.executeUpdate() > 0;
+    } catch (SQLException e) {
+        e.printStackTrace();
+        return false;
     }
+}
    public int contarProductos() {
     int total = 0;
     String sql = "SELECT COUNT(*) FROM Productos";
