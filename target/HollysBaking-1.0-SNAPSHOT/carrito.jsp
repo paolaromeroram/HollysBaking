@@ -10,16 +10,9 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
     <style>
-        body {
-            background-color: #f8f5f2;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        }
-        .navbar-custom {
-            background-color: #6F4E37;
-        }
-        .navbar-custom .navbar-brand, .navbar-custom .nav-link {
-            color: white;
-        }
+        body { background-color: #f8f5f2; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        .navbar-custom { background-color: #6F4E37; }
+        .navbar-custom .navbar-brand, .navbar-custom .nav-link { color: white; }
         .cart-container {
             background: white;
             border-radius: 20px;
@@ -31,11 +24,22 @@
             border-bottom: 1px solid #eee;
             padding: 20px 0;
         }
+        .cart-item:last-child { border-bottom: none; }
         .cart-img {
             width: 100px;
             height: 100px;
             object-fit: cover;
             border-radius: 10px;
+        }
+        .sin-imagen {
+            width: 100px;
+            height: 100px;
+            background: #f0f0f0;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
         }
         .cart-total {
             font-size: 2rem;
@@ -63,12 +67,17 @@
             border: none;
             font-size: 1.2rem;
         }
-        .btn-eliminar:hover {
-            color: #a71d2a;
-        }
+        .btn-eliminar:hover { color: #a71d2a; }
         .empty-cart {
             text-align: center;
             padding: 60px 0;
+        }
+        .descuento-badge {
+            background-color: #28a745;
+            color: white;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 0.9rem;
         }
     </style>
 </head>
@@ -97,29 +106,31 @@
             <h2 class="mb-4"><i class="bi bi-cart3"></i> Tu Carrito</h2>
 
             <%
-                List<Producto> carrito = (List<Producto>) session.getAttribute("carrito");
-                double total = 0.0;
+                List<Producto> carrito = (List<Producto>) request.getAttribute("carrito");
+                Double subtotal = (Double) request.getAttribute("subtotal");
+                Double total = (Double) request.getAttribute("total");
+                String tipoDescuento = (String) request.getAttribute("tipoDescuento");
+                
+                if (subtotal == null) subtotal = 0.0;
+                if (total == null) total = 0.0;
+                double descuento = subtotal - total;
                 
                 if (carrito != null && !carrito.isEmpty()) {
             %>
 
-            <!-- Lista de productos -->
-            <% for (Producto p : carrito) { 
-                total += p.getPrecioVenta();
-            %>
+            <!-- Items del carrito -->
+            <% for (Producto p : carrito) { %>
             <div class="cart-item row align-items-center">
                 <div class="col-md-2">
                     <% if(p.getImagen() != null) { %>
                         <img src="ImagenServlet?id=<%= p.getIdProducto() %>" class="cart-img" alt="<%= p.getNombreProducto() %>">
                     <% } else { %>
-                        <div class="cart-img d-flex align-items-center justify-content-center bg-light">
-                            <i class="bi bi-cake2" style="font-size: 2rem; color: #6F4E37;"></i>
-                        </div>
+                        <div class="sin-imagen"><i class="bi bi-cake2" style="color: #6F4E37;"></i></div>
                     <% } %>
                 </div>
                 <div class="col-md-6">
                     <h5><%= p.getNombreProducto() %></h5>
-                    <p class="text-muted mb-0"><%= p.getCategoria() != null ? p.getCategoria() : "Sin categoría" %></p>
+                    <span class="badge bg-secondary"><%= p.getCategoria() != null ? p.getCategoria() : "Sin categoria" %></span>
                 </div>
                 <div class="col-md-3 text-end">
                     <h5 class="text-brown">S/ <%= p.getPrecioVenta() %></h5>
@@ -128,7 +139,7 @@
                     <form action="CarritoServlet" method="POST" style="display: inline;">
                         <input type="hidden" name="accion" value="eliminar">
                         <input type="hidden" name="id" value="<%= p.getIdProducto() %>">
-                        <button type="submit" class="btn-eliminar" onclick="return confirm('¿Eliminar este producto?')">
+                        <button type="submit" class="btn-eliminar" onclick="return confirm('Eliminar este producto?')">
                             <i class="bi bi-trash"></i>
                         </button>
                     </form>
@@ -136,7 +147,7 @@
             </div>
             <% } %>
 
-            <!-- Total y botón de pago -->
+            <!-- Total con descuento visible -->
             <div class="row mt-4">
                 <div class="col-md-6">
                     <a href="CatalogoServlet" class="btn btn-outline-secondary">
@@ -144,8 +155,20 @@
                     </a>
                 </div>
                 <div class="col-md-6 text-end">
-                    <p class="text-muted mb-1">Total a pagar:</p>
+                    
+                    <% if (descuento > 0) { %>
+                        <p class="text-muted mb-1">
+                            Subtotal: <del>S/ <%= String.format("%.2f", subtotal) %></del>
+                        </p>
+                        <p class="mb-2">
+                            <span class="descuento-badge">
+                                <i class="bi bi-tag-fill"></i> <%= tipoDescuento != null ? tipoDescuento : "Descuento aplicado" %>: -S/ <%= String.format("%.2f", descuento) %>
+                            </span>
+                        </p>
+                    <% } %>
+                    
                     <div class="cart-total mb-3">S/ <%= String.format("%.2f", total) %></div>
+                    
                     <a href="PagoServlet" class="btn btn-pagar">
                         <i class="bi bi-credit-card"></i> Pagar con Yape
                     </a>
@@ -153,13 +176,13 @@
             </div>
 
             <% } else { %>
-            <!-- Carrito vacío -->
+            <!-- Carrito vacio -->
             <div class="empty-cart">
                 <i class="bi bi-cart-x" style="font-size: 5rem; color: #ccc;"></i>
-                <h3 class="mt-3 text-muted">Tu carrito está vacío</h3>
-                <p class="text-muted">¡Agrega algunos productos deliciosos!</p>
-                <a href="CatalogoServlet" class="btn btn-primary mt-3">
-                    <i class="bi bi-shop"></i> Ver Catálogo
+                <h3 class="mt-3 text-muted">Tu carrito esta vacio</h3>
+                <p class="text-muted">Agrega algunos deliciosos productos!</p>
+                <a href="CatalogoServlet" class="btn btn-primary btn-lg mt-3" style="background-color: #6F4E37; border: none;">
+                    <i class="bi bi-shop-window"></i> Ver Catalogo
                 </a>
             </div>
             <% } %>
