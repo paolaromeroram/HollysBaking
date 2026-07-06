@@ -104,21 +104,20 @@ public class ProductoDAO extends GenericDAO<Producto> {
     
     // Insertar con auditoria
     public boolean insertarProducto(Producto p, String usuarioResponsable) {
-        String sql = "INSERT INTO Productos (nombre_producto, descripcion, precio_venta, stock, estado_stock, categoria, imagen, fecha_creacion, usuario_creacion) " +
-                     "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
-        
-        return ejecutarActualizacion(sql,
-            p.getNombreProducto(),
-            p.getDescripcion(),
-            p.getPrecioVenta(),
-            p.getStock(),
-            p.isEstadoStock(),
-            p.getCategoria(),
-            p.getImagen(),
-            LocalDateTime.now(),
-            usuarioResponsable
-        );
-    }
+    // INSERT sin las columnas de auditoría primero, para asegurar que funcione
+    String sql = "INSERT INTO Productos (nombre_producto, descripcion, precio_venta, stock, estado_stock, categoria, imagen) " +
+                 "VALUES (?, ?, ?, ?, ?, ?, ?)";
+    
+    return ejecutarActualizacion(sql,
+        p.getNombreProducto(),
+        p.getDescripcion(),
+        p.getPrecioVenta(),
+        p.getStock(),
+        p.isEstadoStock(),
+        p.getCategoria(),
+        p.getImagen()
+    );
+}
     
     // Sobrecarga para compatibilidad
     public boolean insertarProducto(Producto p) {
