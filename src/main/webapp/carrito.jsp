@@ -10,10 +10,17 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
     <style>
-        body { background-color: #f8f5f2; }
-        .navbar-custom { background-color: #6F4E37; }
-        .navbar-custom .navbar-brand, .navbar-custom .nav-link { color: white; }
-        .cart-section {
+        body {
+            background-color: #f8f5f2;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        .navbar-custom {
+            background-color: #6F4E37;
+        }
+        .navbar-custom .navbar-brand, .navbar-custom .nav-link {
+            color: white;
+        }
+        .cart-container {
             background: white;
             border-radius: 20px;
             padding: 40px;
@@ -24,39 +31,44 @@
             border-bottom: 1px solid #eee;
             padding: 20px 0;
         }
-        .cart-item:last-child { border-bottom: none; }
-        .item-img {
-            width: 80px;
-            height: 80px;
-            background-color: #e9ecef;
+        .cart-img {
+            width: 100px;
+            height: 100px;
+            object-fit: cover;
             border-radius: 10px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+        }
+        .cart-total {
             font-size: 2rem;
             color: #6F4E37;
-        }
-        .total-section {
-            background-color: #6F4E37;
-            color: white;
-            border-radius: 15px;
-            padding: 20px;
-            margin-top: 20px;
-        }
-        .btn-checkout {
-            background-color: white;
-            color: #6F4E37;
-            border: none;
-            border-radius: 25px;
-            padding: 12px 30px;
             font-weight: bold;
         }
-        .btn-checkout:hover {
-            background-color: #f8f5f2;
+        .btn-pagar {
+            background-color: #742284;
+            color: white;
+            border: none;
+            border-radius: 30px;
+            padding: 15px 40px;
+            font-size: 1.2rem;
+            width: 100%;
+            transition: all 0.3s;
+        }
+        .btn-pagar:hover {
+            background-color: #5a1a6b;
+            color: white;
+            transform: scale(1.02);
+        }
+        .btn-eliminar {
+            color: #dc3545;
+            background: none;
+            border: none;
+            font-size: 1.2rem;
+        }
+        .btn-eliminar:hover {
+            color: #a71d2a;
         }
         .empty-cart {
             text-align: center;
-            padding: 60px 20px;
+            padding: 60px 0;
         }
     </style>
 </head>
@@ -72,7 +84,7 @@
                 <ul class="navbar-nav ms-auto">
                     <li class="nav-item">
                         <a class="nav-link" href="CatalogoServlet">
-                            <i class="bi bi-shop-window"></i> Seguir Comprando
+                            <i class="bi bi-arrow-left"></i> Seguir Comprando
                         </a>
                     </li>
                 </ul>
@@ -81,71 +93,77 @@
     </nav>
 
     <div class="container">
-        <div class="cart-section">
+        <div class="cart-container">
             <h2 class="mb-4"><i class="bi bi-cart3"></i> Tu Carrito</h2>
-            
-            <% 
-                List<Producto> carrito = (List<Producto>) request.getAttribute("carrito");
-                Double total = (Double) request.getAttribute("total");
+
+            <%
+                List<Producto> carrito = (List<Producto>) session.getAttribute("carrito");
+                double total = 0.0;
                 
                 if (carrito != null && !carrito.isEmpty()) {
             %>
-            
-            <!-- Items del carrito -->
-            <% for (Producto p : carrito) { %>
-            <div class="cart-item d-flex align-items-center">
-                <div class="item-img me-3">
-                    <i class="bi bi-cake2"></i>
+
+            <!-- Lista de productos -->
+            <% for (Producto p : carrito) { 
+                total += p.getPrecioVenta();
+            %>
+            <div class="cart-item row align-items-center">
+                <div class="col-md-2">
+                    <% if(p.getImagen() != null) { %>
+                        <img src="ImagenServlet?id=<%= p.getIdProducto() %>" class="cart-img" alt="<%= p.getNombreProducto() %>">
+                    <% } else { %>
+                        <div class="cart-img d-flex align-items-center justify-content-center bg-light">
+                            <i class="bi bi-cake2" style="font-size: 2rem; color: #6F4E37;"></i>
+                        </div>
+                    <% } %>
                 </div>
-                <div class="flex-grow-1">
-                    <h5 class="mb-1"><%= p.getNombreProducto() %></h5>
-                    <span class="badge bg-secondary"><%= p.getCategoria() != null ? p.getCategoria() : "Sin categoría" %></span>
+                <div class="col-md-6">
+                    <h5><%= p.getNombreProducto() %></h5>
+                    <p class="text-muted mb-0"><%= p.getCategoria() != null ? p.getCategoria() : "Sin categoría" %></p>
                 </div>
-                <div class="text-end">
-                    <div class="h5 mb-2 text-brown">S/ <%= p.getPrecioVenta() %></div>
+                <div class="col-md-3 text-end">
+                    <h5 class="text-brown">S/ <%= p.getPrecioVenta() %></h5>
+                </div>
+                <div class="col-md-1 text-end">
                     <form action="CarritoServlet" method="POST" style="display: inline;">
                         <input type="hidden" name="accion" value="eliminar">
                         <input type="hidden" name="id" value="<%= p.getIdProducto() %>">
-                        <button type="submit" class="btn btn-sm btn-outline-danger">
-                            <i class="bi bi-trash"></i> Eliminar
+                        <button type="submit" class="btn-eliminar" onclick="return confirm('¿Eliminar este producto?')">
+                            <i class="bi bi-trash"></i>
                         </button>
                     </form>
                 </div>
             </div>
             <% } %>
-            
-            <!-- Total -->
-            <div class="total-section d-flex justify-content-between align-items-center">
-                <div>
-                    <h4 class="mb-0">Total:</h4>
-                    <h2 class="mb-0">S/ <%= total %></h2>
+
+            <!-- Total y botón de pago -->
+            <div class="row mt-4">
+                <div class="col-md-6">
+                    <a href="CatalogoServlet" class="btn btn-outline-secondary">
+                        <i class="bi bi-arrow-left"></i> Seguir Comprando
+                    </a>
                 </div>
-                <div class="text-end">
-                    <form action="CarritoServlet" method="POST" class="d-inline me-2">
-                        <input type="hidden" name="accion" value="vaciar">
-                        <button type="submit" class="btn btn-outline-light">
-                            <i class="bi bi-trash"></i> Vaciar
-                        </button>
-                    </form>
-                    <button class="btn btn-checkout">
-                        <i class="bi bi-credit-card"></i> Finalizar Compra
-                    </button>
+                <div class="col-md-6 text-end">
+                    <p class="text-muted mb-1">Total a pagar:</p>
+                    <div class="cart-total mb-3">S/ <%= String.format("%.2f", total) %></div>
+                    <a href="PagoServlet" class="btn btn-pagar">
+                        <i class="bi bi-credit-card"></i> Pagar con Yape
+                    </a>
                 </div>
             </div>
-            
+
             <% } else { %>
-            
             <!-- Carrito vacío -->
             <div class="empty-cart">
                 <i class="bi bi-cart-x" style="font-size: 5rem; color: #ccc;"></i>
                 <h3 class="mt-3 text-muted">Tu carrito está vacío</h3>
-                <p class="text-muted">¡Agrega algunos deliciosos productos!</p>
-                <a href="CatalogoServlet" class="btn btn-primary btn-lg mt-3" style="background-color: #6F4E37; border: none;">
-                    <i class="bi bi-shop-window"></i> Ver Catálogo
+                <p class="text-muted">¡Agrega algunos productos deliciosos!</p>
+                <a href="CatalogoServlet" class="btn btn-primary mt-3">
+                    <i class="bi bi-shop"></i> Ver Catálogo
                 </a>
             </div>
-            
             <% } %>
+
         </div>
     </div>
 

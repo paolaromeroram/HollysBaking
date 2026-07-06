@@ -185,6 +185,23 @@
             </div>
         </div>
 
+        <!-- Buscador -->
+        <div class="filter-section text-center mb-4">
+            <form action="CatalogoServlet" method="GET" class="d-flex justify-content-center">
+                <div class="input-group" style="max-width: 500px;">
+                    <input type="text" name="buscar" class="form-control" 
+                           placeholder="🔍 Buscar producto por nombre..." 
+                           value="<%= request.getAttribute("busqueda") != null ? request.getAttribute("busqueda") : "" %>">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="bi bi-search"></i> Buscar
+                    </button>
+                    <% if(request.getAttribute("busqueda") != null) { %>
+                        <a href="CatalogoServlet" class="btn btn-outline-secondary">Limpiar</a>
+                    <% } %>
+                </div>
+            </form>
+        </div>
+
         <!-- Productos -->
         <div class="row g-4">
             <% 
@@ -192,42 +209,42 @@
                 if (lista != null && !lista.isEmpty()) {
                     for (Producto p : lista) {
             %>
-           <div class="col-md-4 col-lg-3">
-    <div class="product-card" onclick="window.location.href='DetalleProductoServlet?id=<%= p.getIdProducto() %>'">
-        
-        <%-- IMAGEN REAL O ICONO POR DEFECTO --%>
-        <% if(p.getImagen() != null) { %>
-            <img src="ImagenServlet?id=<%= p.getIdProducto() %>" 
-                 alt="<%= p.getNombreProducto() %>"
-                 style="width: 100%; height: 200px; object-fit: cover; border-radius: 15px 15px 0 0;">
-        <% } else { %>
-            <div class="product-img">
-                <i class="bi bi-cake2"></i>
+            <div class="col-md-4 col-lg-3">
+                <div class="product-card" onclick="window.location.href='DetalleProductoServlet?id=<%= p.getIdProducto() %>'">
+                    
+                    <%-- IMAGEN REAL O ICONO POR DEFECTO --%>
+                    <% if(p.getImagen() != null) { %>
+                        <img src="ImagenServlet?id=<%= p.getIdProducto() %>" 
+                             alt="<%= p.getNombreProducto() %>"
+                             style="width: 100%; height: 200px; object-fit: cover; border-radius: 15px 15px 0 0;">
+                    <% } else { %>
+                        <div class="product-img">
+                            <i class="bi bi-cake2"></i>
+                        </div>
+                    <% } %>
+                    
+                    <div class="product-body">
+                        <span class="badge bg-secondary mb-2"><%= p.getCategoria() != null ? p.getCategoria() : "Sin categoría" %></span>
+                        <h5 class="product-title"><%= p.getNombreProducto() %></h5>
+                        <div class="product-price">S/ <%= p.getPrecioVenta() %></div>
+                    </div>
+                </div>
+                
+                <form action="CarritoServlet" method="POST" class="mt-2">
+                    <input type="hidden" name="accion" value="agregar">
+                    <input type="hidden" name="id" value="<%= p.getIdProducto() %>">
+                    <button type="submit" class="btn btn-order">
+                        <i class="bi bi-cart-plus"></i> Agregar al Carrito
+                    </button>
+                </form>
             </div>
-        <% } %>
-        
-        <div class="product-body">
-            <span class="badge bg-secondary mb-2"><%= p.getCategoria() != null ? p.getCategoria() : "Sin categoría" %></span>
-            <h5 class="product-title"><%= p.getNombreProducto() %></h5>
-            <div class="product-price">S/ <%= p.getPrecioVenta() %></div>
-        </div>
-    </div>
-    
-    <form action="CarritoServlet" method="POST" class="mt-2">
-        <input type="hidden" name="accion" value="agregar">
-        <input type="hidden" name="id" value="<%= p.getIdProducto() %>">
-        <button type="submit" class="btn btn-order">
-            <i class="bi bi-cart-plus"></i> Agregar al Carrito
-        </button>
-    </form>
-</div>
             <% 
                     }
                 } else {
             %>
             <div class="col-12 text-center py-5">
                 <i class="bi bi-inbox" style="font-size: 4rem; color: #ccc;"></i>
-                <h3 class="mt-3 text-muted">No hay productos en esta categoría</h3>
+                <h3 class="mt-3 text-muted">No hay productos disponibles</h3>
                 <a href="CatalogoServlet" class="btn btn-outline-primary mt-3">Ver todos los productos</a>
             </div>
             <% } %>

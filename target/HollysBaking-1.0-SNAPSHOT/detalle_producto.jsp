@@ -85,9 +85,16 @@
         <div class="product-detail">
             <div class="row">
                 <div class="col-md-6">
-                    <div class="product-img-large">
-                        <i class="bi bi-cake2"></i>
-                    </div>
+                  <!-- DESPUÉS (imagen real desde BD) -->
+<% if(producto.getImagen() != null) { %>
+    <img src="ImagenServlet?id=<%= producto.getIdProducto() %>" 
+         alt="<%= producto.getNombreProducto() %>"
+         style="width: 100%; height: 400px; object-fit: cover; border-radius: 15px;">
+<% } else { %>
+    <div class="product-img-large">
+        <i class="bi bi-cake2"></i>
+    </div>
+<% } %>
                 </div>
                 <div class="col-md-6 d-flex flex-column justify-content-center">
                     <span class="badge bg-secondary mb-3" style="width: fit-content;">

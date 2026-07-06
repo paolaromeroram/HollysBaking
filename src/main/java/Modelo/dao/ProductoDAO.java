@@ -142,4 +142,48 @@ public class ProductoDAO {
         return false;
     }
 }
+ public List<Producto> buscarPorNombre(String nombre) {
+    List<Producto> lista = new ArrayList<>();
+    String sql = "SELECT id_producto, nombre_producto, descripcion, precio_venta, stock, estado_stock, categoria, imagen " +
+                 "FROM Productos WHERE LOWER(nombre_producto) LIKE LOWER(?)";
+    
+    try (Connection con = ConexionDB.getConexion();
+         PreparedStatement ps = con.prepareStatement(sql)) {
+        
+        ps.setString(1, "%" + nombre + "%");
+        ResultSet rs = ps.executeQuery();
+        
+        while (rs.next()) {
+            Producto p = new Producto();
+            p.setIdProducto(rs.getInt("id_producto"));
+            p.setNombreProducto(rs.getString("nombre_producto"));
+            p.setDescripcion(rs.getString("descripcion"));
+            p.setPrecioVenta(rs.getDouble("precio_venta"));
+            p.setStock(rs.getInt("stock"));
+            p.setEstadoStock(rs.getBoolean("estado_stock"));
+            p.setCategoria(rs.getString("categoria"));
+            p.setImagen(rs.getBytes("imagen"));
+            lista.add(p);
+        }
+    } catch (SQLException e) {
+        e.printStackTrace();
+    }
+    return lista;
+}  
+ public List<String> obtenerCategorias() {
+    List<String> categorias = new ArrayList<>();
+    String sql = "SELECT DISTINCT categoria FROM Productos WHERE categoria IS NOT NULL AND categoria != ''";
+    
+    try (Connection con = ConexionDB.getConexion();
+         PreparedStatement ps = con.prepareStatement(sql);
+         ResultSet rs = ps.executeQuery()) {
+        
+        while (rs.next()) {
+            categorias.add(rs.getString("categoria"));
+        }
+    } catch (SQLException e) {
+        e.printStackTrace();
+    }
+    return categorias;
+}
 }
