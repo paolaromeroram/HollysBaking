@@ -1,159 +1,21 @@
 package Modelo.dao;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.ArrayList;
+import java.time.LocalDateTime;
 import java.util.List;
-import Modelo.conexion.ConexionDB;
+import java.util.function.Function;
 import Modelo.entidades.Producto;
+import java.util.ArrayList;
 
-public class ProductoDAO {
-
-    public List<Producto> listarProductos() {
-    List<Producto> lista = new ArrayList<>();
-    String sql = "SELECT id_producto, nombre_producto, descripcion, precio_venta, stock, estado_stock, categoria, imagen FROM Productos";
+/**
+ * DAO de Producto con programacion funcional (extiende GenericDAO)
+ */
+public class ProductoDAO extends GenericDAO<Producto> {
     
-    try (Connection con = ConexionDB.getConexion();
-         PreparedStatement ps = con.prepareStatement(sql);
-         ResultSet rs = ps.executeQuery()) {
-        
-        while (rs.next()) {
-            Producto p = new Producto();
-            p.setIdProducto(rs.getInt("id_producto"));
-            p.setNombreProducto(rs.getString("nombre_producto"));
-            p.setDescripcion(rs.getString("descripcion"));
-            p.setPrecioVenta(rs.getDouble("precio_venta"));
-            p.setStock(rs.getInt("stock"));
-            p.setEstadoStock(rs.getBoolean("estado_stock"));
-            p.setCategoria(rs.getString("categoria"));
-            p.setImagen(rs.getBytes("imagen"));  // NUEVO
-            lista.add(p);
-        }
-    } catch (SQLException e) {
-        e.printStackTrace();
-    }
-    return lista;
-}
-    
-    // NUEVO: Filtrar por categoría
-    public List<Producto> listarPorCategoria(String categoria) {
-        List<Producto> lista = new ArrayList<>();
-        String sql = "SELECT id_producto, nombre_producto, precio_venta, categoria FROM Productos WHERE categoria = ?";
-        
-        try (Connection con = ConexionDB.getConexion();
-             PreparedStatement ps = con.prepareStatement(sql)) {
-            
-            ps.setString(1, categoria);
-            ResultSet rs = ps.executeQuery();
-            
-            while (rs.next()) {
-                Producto p = new Producto();
-                p.setIdProducto(rs.getInt("id_producto"));
-                p.setNombreProducto(rs.getString("nombre_producto"));
-                p.setPrecioVenta(rs.getDouble("precio_venta"));
-                p.setCategoria(rs.getString("categoria"));
-                lista.add(p);
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        return lista;
-    }
-    
-    // NUEVO: Buscar producto por ID
-    public Producto buscarPorId(int id) {
-        String sql = "SELECT id_producto, nombre_producto, precio_venta, categoria FROM Productos WHERE id_producto = ?";
-        
-        try (Connection con = ConexionDB.getConexion();
-             PreparedStatement ps = con.prepareStatement(sql)) {
-            
-            ps.setInt(1, id);
-            ResultSet rs = ps.executeQuery();
-            
-            if (rs.next()) {
-                Producto p = new Producto();
-                p.setIdProducto(rs.getInt("id_producto"));
-                p.setNombreProducto(rs.getString("nombre_producto"));
-                p.setPrecioVenta(rs.getDouble("precio_venta"));
-                p.setCategoria(rs.getString("categoria"));
-                return p;
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        return null;
-    }
-    
-    public boolean insertarProducto(Producto p) {
-    String sql = "INSERT INTO Productos (nombre_producto, descripcion, precio_venta, stock, estado_stock, categoria, imagen) VALUES (?, ?, ?, ?, ?, ?, ?)";
-    
-    try (Connection con = ConexionDB.getConexion();
-         PreparedStatement ps = con.prepareStatement(sql)) {
-        
-        ps.setString(1, p.getNombreProducto());
-        ps.setString(2, p.getDescripcion());
-        ps.setDouble(3, p.getPrecioVenta());
-        ps.setInt(4, p.getStock());
-        ps.setBoolean(5, p.isEstadoStock());
-        ps.setString(6, p.getCategoria());
-        
-        // NUEVO: Guardar imagen como BYTEA
-        if (p.getImagen() != null) {
-            ps.setBytes(7, p.getImagen());
-        } else {
-            ps.setNull(7, java.sql.Types.BINARY);
-        }
-        
-        return ps.executeUpdate() > 0;
-    } catch (SQLException e) {
-        e.printStackTrace();
-        return false;
-    }
-}
-   public int contarProductos() {
-    int total = 0;
-    String sql = "SELECT COUNT(*) FROM Productos";
-    
-    try (Connection con = ConexionDB.getConexion();
-         PreparedStatement ps = con.prepareStatement(sql);
-         ResultSet rs = ps.executeQuery()) {
-        
-        if (rs.next()) {
-            total = rs.getInt(1);
-        }
-    } catch (Exception e) {
-        System.out.println("Error al contar productos: " + e.getMessage());
-        e.printStackTrace();
-    }
-    return total;
-}
-   public boolean eliminarProducto(int id) {
-    String sql = "DELETE FROM Productos WHERE id_producto = ?";
-    
-    try (Connection con = ConexionDB.getConexion();
-         PreparedStatement ps = con.prepareStatement(sql)) {
-        
-        ps.setInt(1, id);
-        return ps.executeUpdate() > 0;
-    } catch (SQLException e) {
-        e.printStackTrace();
-        return false;
-    }
-}
- public List<Producto> buscarPorNombre(String nombre) {
-    List<Producto> lista = new ArrayList<>();
-    String sql = "SELECT id_producto, nombre_producto, descripcion, precio_venta, stock, estado_stock, categoria, imagen " +
-                 "FROM Productos WHERE LOWER(nombre_producto) LIKE LOWER(?)";
-    
-    try (Connection con = ConexionDB.getConexion();
-         PreparedStatement ps = con.prepareStatement(sql)) {
-        
-        ps.setString(1, "%" + nombre + "%");
-        ResultSet rs = ps.executeQuery();
-        
-        while (rs.next()) {
+    // Lambda: mapea ResultSet -> Producto (PROGRAMACION FUNCIONAL)
+    private final Function<ResultSet, Producto> mapper = rs -> {
+        try {
             Producto p = new Producto();
             p.setIdProducto(rs.getInt("id_producto"));
             p.setNombreProducto(rs.getString("nombre_producto"));
@@ -163,27 +25,102 @@ public class ProductoDAO {
             p.setEstadoStock(rs.getBoolean("estado_stock"));
             p.setCategoria(rs.getString("categoria"));
             p.setImagen(rs.getBytes("imagen"));
-            lista.add(p);
+            
+            // Auditoria
+            if (rs.getTimestamp("fecha_creacion") != null) {
+                p.setFechaCreacion(rs.getTimestamp("fecha_creacion").toLocalDateTime());
+            }
+            p.setUsuarioCreacion(rs.getString("usuario_creacion"));
+            
+            return p;
+        } catch (SQLException e) {
+            throw new RuntimeException("Error mapeando Producto", e);
         }
-    } catch (SQLException e) {
-        e.printStackTrace();
-    }
-    return lista;
-}  
- public List<String> obtenerCategorias() {
-    List<String> categorias = new ArrayList<>();
-    String sql = "SELECT DISTINCT categoria FROM Productos WHERE categoria IS NOT NULL AND categoria != ''";
+    };
     
-    try (Connection con = ConexionDB.getConexion();
-         PreparedStatement ps = con.prepareStatement(sql);
-         ResultSet rs = ps.executeQuery()) {
+    // Consultas usando GenericDAO (programacion funcional)
+    public List<Producto> listarProductos() {
+        String sql = "SELECT * FROM Productos";
+        return consultarLista(sql, mapper);
+    }
+    
+    public List<Producto> listarPorCategoria(String categoria) {
+        String sql = "SELECT * FROM Productos WHERE categoria = ?";
+        return consultarLista(sql, mapper, categoria);
+    }
+    
+    public Producto buscarPorId(int id) {
+        String sql = "SELECT * FROM Productos WHERE id_producto = ?";
+        return consultarUno(sql, mapper, id);
+    }
+    
+    // Buscador por nombre (para el catalogo)
+    public List<Producto> buscarPorNombre(String nombre) {
+        String sql = "SELECT * FROM Productos WHERE LOWER(nombre_producto) LIKE LOWER(?)";
+        return consultarLista(sql, mapper, "%" + nombre + "%");
+    }
+    
+    // Obtener categorias distintas
+   // Obtener categorias distintas
+public List<String> obtenerCategorias() {
+    String sql = "SELECT DISTINCT categoria FROM Productos WHERE categoria IS NOT NULL";
+    List<String> categorias = new ArrayList<>();
+    
+    try (java.sql.Connection con = Modelo.conexion.ConexionDB.getConexion();
+         java.sql.PreparedStatement ps = con.prepareStatement(sql);
+         java.sql.ResultSet rs = ps.executeQuery()) {
         
         while (rs.next()) {
             categorias.add(rs.getString("categoria"));
         }
-    } catch (SQLException e) {
+        
+    } catch (java.sql.SQLException e) {
         e.printStackTrace();
     }
+    
     return categorias;
+}
+    
+    // Insertar con auditoria
+    public boolean insertarProducto(Producto p, String usuarioResponsable) {
+        String sql = "INSERT INTO Productos (nombre_producto, descripcion, precio_venta, stock, estado_stock, categoria, imagen, fecha_creacion, usuario_creacion) " +
+                     "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
+        
+        return ejecutarActualizacion(sql,
+            p.getNombreProducto(),
+            p.getDescripcion(),
+            p.getPrecioVenta(),
+            p.getStock(),
+            p.isEstadoStock(),
+            p.getCategoria(),
+            p.getImagen(),
+            LocalDateTime.now(),
+            usuarioResponsable
+        );
+    }
+    
+    // Sobrecarga para compatibilidad
+    public boolean insertarProducto(Producto p) {
+        return insertarProducto(p, "sistema");
+    }
+    
+    // Eliminar producto
+    public boolean eliminarProducto(int id) {
+        String sql = "DELETE FROM Productos WHERE id_producto = ?";
+        return ejecutarActualizacion(sql, id);
+    }
+    // Contar productos (para el dashboard)
+public int contarProductos() {
+    String sql = "SELECT COUNT(*) as total FROM Productos";
+    try (java.sql.Connection con = Modelo.conexion.ConexionDB.getConexion();
+         java.sql.PreparedStatement ps = con.prepareStatement(sql);
+         java.sql.ResultSet rs = ps.executeQuery()) {
+        if (rs.next()) {
+            return rs.getInt("total");
+        }
+    } catch (java.sql.SQLException e) {
+        e.printStackTrace();
+    }
+    return 0;
 }
 }

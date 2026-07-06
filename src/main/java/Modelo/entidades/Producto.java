@@ -9,7 +9,10 @@ public class Producto {
     private boolean estadoStock;
     private String categoria;
     private byte[] imagen;  // NUEVO: para guardar la imagen
-    
+    private java.time.LocalDateTime fechaCreacion;
+private String usuarioCreacion;
+private java.time.LocalDateTime fechaModificacion;
+private String usuarioModificacion;
     // Constructor vacío
     public Producto() {}
     
@@ -52,4 +55,16 @@ public class Producto {
     // NUEVO: Getter y Setter para imagen
     public byte[] getImagen() { return imagen; }
     public void setImagen(byte[] imagen) { this.imagen = imagen; }
+    
+    public java.time.LocalDateTime getFechaCreacion() { return fechaCreacion; }
+public void setFechaCreacion(java.time.LocalDateTime fechaCreacion) { this.fechaCreacion = fechaCreacion; }
+
+public String getUsuarioCreacion() { return usuarioCreacion; }
+public void setUsuarioCreacion(String usuarioCreacion) { this.usuarioCreacion = usuarioCreacion; }
+
+public java.time.LocalDateTime getFechaModificacion() { return fechaModificacion; }
+public void setFechaModificacion(java.time.LocalDateTime fechaModificacion) { this.fechaModificacion = fechaModificacion; }
+
+public String getUsuarioModificacion() { return usuarioModificacion; }
+public void setUsuarioModificacion(String usuarioModificacion) { this.usuarioModificacion = usuarioModificacion; }
 }
