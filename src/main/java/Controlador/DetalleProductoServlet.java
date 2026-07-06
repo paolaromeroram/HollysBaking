@@ -1,4 +1,4 @@
-package controlador;
+package Controlador;
 
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
@@ -6,8 +6,8 @@ import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import modelo.dao.ProductoDAO;
-import modelo.entidades.Producto;
+import Modelo.dao.ProductoDAO;
+import Modelo.entidades.Producto;
 
 @WebServlet(name = "DetalleProductoServlet", urlPatterns = {"/DetalleProductoServlet"})
 public class DetalleProductoServlet extends HttpServlet {

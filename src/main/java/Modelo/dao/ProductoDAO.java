@@ -1,4 +1,4 @@
-package modelo.dao;
+package Modelo.dao;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -6,8 +6,8 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
-import modelo.conexion.ConexionDB;
-import modelo.entidades.Producto;
+import Modelo.conexion.ConexionDB;
+import Modelo.entidades.Producto;
 
 public class ProductoDAO {
 
@@ -102,7 +102,7 @@ public class ProductoDAO {
     int total = 0;
     String sql = "SELECT COUNT(*) FROM Productos"; // Asegúrate de que el nombre de la tabla sea correcto
     try {
-        java.sql.Connection con = modelo.conexion.ConexionDB.getConexion();
+        java.sql.Connection con = Modelo.conexion.ConexionDB.getConexion();
         java.sql.PreparedStatement ps = con.prepareStatement(sql);
         java.sql.ResultSet rs = ps.executeQuery();
         if (rs.next()) {

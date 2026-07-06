@@ -1,4 +1,4 @@
-package modelo.dao;
+package Modelo.dao;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -6,8 +6,8 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
-import modelo.conexion.ConexionDB;
-import modelo.entidades.Insumo;
+import Modelo.conexion.ConexionDB;
+import Modelo.entidades.Insumo;
 
 public class InsumoDAO {
 

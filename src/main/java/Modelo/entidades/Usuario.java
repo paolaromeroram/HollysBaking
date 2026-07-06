@@ -1,4 +1,4 @@
-package modelo.entidades;
+package Modelo.entidades;
 
 public class Usuario {
     private int idUsuario;

@@ -1,4 +1,4 @@
-package controlador;
+package Controlador;
 
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
@@ -7,8 +7,8 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.List;
-import modelo.dao.InsumoDAO;
-import modelo.entidades.Insumo;
+import Modelo.dao.InsumoDAO;
+import Modelo.entidades.Insumo;
 
 @WebServlet(name = "InsumoServlet", urlPatterns = {"/InsumoServlet"})
 public class InsumoServlet extends HttpServlet {

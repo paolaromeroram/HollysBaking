@@ -1,4 +1,4 @@
-package controlador;
+package Controlador;
 
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
@@ -7,12 +7,12 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.List;
-import modelo.dao.InsumoDAO;
-import modelo.dao.ProductoDAO;
-import modelo.dao.RecetaDAO;
-import modelo.entidades.Insumo;
-import modelo.entidades.Producto;
-import modelo.entidades.Receta;
+import Modelo.dao.InsumoDAO;
+import Modelo.dao.ProductoDAO;
+import Modelo.dao.RecetaDAO;
+import Modelo.entidades.Insumo;
+import Modelo.entidades.Producto;
+import Modelo.entidades.Receta;
 
 @WebServlet(name = "RecetaServlet", urlPatterns = {"/RecetaServlet"})
 public class RecetaServlet extends HttpServlet {

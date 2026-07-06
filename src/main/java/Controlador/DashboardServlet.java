@@ -1,4 +1,4 @@
-package controlador;
+package Controlador;
 
 
 import jakarta.servlet.ServletException;
@@ -7,7 +7,7 @@ import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import modelo.dao.ProductoDAO;
+import Modelo.dao.ProductoDAO;
 
 @WebServlet(name = "DashboardServlet", urlPatterns = {"/DashboardServlet"})
 public class DashboardServlet extends HttpServlet {

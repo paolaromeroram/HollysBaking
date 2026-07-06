@@ -1,4 +1,4 @@
-package controlador;
+package Controlador;
 
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
@@ -6,8 +6,8 @@ import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import modelo.dao.UsuarioDAO;
-import modelo.entidades.Usuario;
+import Modelo.dao.UsuarioDAO;
+import Modelo.entidades.Usuario;
 
 @WebServlet(name = "RegistroServlet", urlPatterns = {"/RegistroServlet"})
 public class RegistroServlet extends HttpServlet {

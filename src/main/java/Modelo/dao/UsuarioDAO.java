@@ -1,10 +1,10 @@
-package modelo.dao;
+package Modelo.dao;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
-import modelo.conexion.ConexionDB;
-import modelo.entidades.Usuario;
+import Modelo.conexion.ConexionDB;
+import Modelo.entidades.Usuario;
 
 public class UsuarioDAO {
     

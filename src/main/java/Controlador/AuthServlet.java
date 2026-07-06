@@ -1,4 +1,4 @@
-package controlador;
+package Controlador;
 
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
@@ -7,8 +7,8 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import java.io.IOException;
-import modelo.dao.UsuarioDAO;
-import modelo.entidades.Usuario;
+import Modelo.dao.UsuarioDAO;
+import Modelo.entidades.Usuario;
 
 // Esta línea es crucial: conecta el action="AuthServlet" de tu formulario con esta clase
 @WebServlet(name = "AuthServlet", urlPatterns = {"/AuthServlet"})

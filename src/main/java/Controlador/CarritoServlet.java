@@ -1,4 +1,4 @@
-package controlador;
+package Controlador;
 
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
@@ -9,8 +9,8 @@ import jakarta.servlet.http.HttpSession;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import modelo.dao.ProductoDAO;
-import modelo.entidades.Producto;
+import Modelo.dao.ProductoDAO;
+import Modelo.entidades.Producto;
 
 @WebServlet(name = "CarritoServlet", urlPatterns = {"/CarritoServlet"})
 public class CarritoServlet extends HttpServlet {
