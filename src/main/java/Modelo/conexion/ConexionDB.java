@@ -3,7 +3,6 @@ package Modelo.conexion;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
-
 public class ConexionDB {
     
     // Variables de entorno de Railway (o valores locales para desarrollo)

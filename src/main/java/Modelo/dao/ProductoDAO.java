@@ -100,17 +100,19 @@ public class ProductoDAO {
     }
    public int contarProductos() {
     int total = 0;
-    String sql = "SELECT COUNT(*) FROM Productos"; // Asegúrate de que el nombre de la tabla sea correcto
-    try {
-        java.sql.Connection con = Modelo.conexion.ConexionDB.getConexion();
-        java.sql.PreparedStatement ps = con.prepareStatement(sql);
-        java.sql.ResultSet rs = ps.executeQuery();
+    String sql = "SELECT COUNT(*) FROM Productos";
+    
+    try (Connection con = ConexionDB.getConexion();
+         PreparedStatement ps = con.prepareStatement(sql);
+         ResultSet rs = ps.executeQuery()) {
+        
         if (rs.next()) {
             total = rs.getInt(1);
         }
     } catch (Exception e) {
         System.out.println("Error al contar productos: " + e.getMessage());
+        e.printStackTrace();
     }
     return total;
-} 
+}
 }
