@@ -53,59 +53,81 @@ public class ProductoServlet extends HttpServlet {
     }
 
     @Override
-    protected void doPost(HttpServletRequest request, HttpServletResponse response)
-            throws ServletException, IOException {
+protected void doPost(HttpServletRequest request, HttpServletResponse response)
+        throws ServletException, IOException {
+    
+    request.setCharacterEncoding("UTF-8");
+    
+    try {
+        // Para multipart, necesitas parsear los parametros
+        String nombre = request.getParameter("nombre");
+        String descripcion = request.getParameter("descripcion");
+        String precioStr = request.getParameter("precio");
+        String categoria = request.getParameter("categoria");
         
-        request.setCharacterEncoding("UTF-8");
+        System.out.println("=== DATOS RECIBIDOS ===");
+        System.out.println("Nombre: [" + nombre + "]");
+        System.out.println("Precio: [" + precioStr + "]");
+        System.out.println("Categoria: [" + categoria + "]");
         
-        try {
-            String nombre = request.getParameter("nombre");
-            String descripcion = request.getParameter("descripcion");
-            String precioStr = request.getParameter("precio");
-            String categoria = request.getParameter("categoria");
+        // Validación
+        if (nombre == null || nombre.trim().isEmpty() ||
+            precioStr == null || precioStr.trim().isEmpty() ||
+            categoria == null || categoria.trim().isEmpty()) {
             
-            // Procesar imagen
-            Part imagenPart = request.getPart("imagen");
-            byte[] imagenBytes = null;
-            
-            if (imagenPart != null && imagenPart.getSize() > 0) {
-                InputStream inputStream = imagenPart.getInputStream();
-                imagenBytes = inputStream.readAllBytes();
-            }
-            
-            double precio = Double.parseDouble(precioStr);
-            
-            Producto p = new Producto();
-            p.setNombreProducto(nombre);
-            p.setDescripcion(descripcion);
-            p.setPrecioVenta(precio);
-            p.setStock(0);
-            p.setEstadoStock(true);
-            p.setCategoria(categoria);
-            p.setImagen(imagenBytes);
-            
-            // AUDITORIA: Obtener usuario logueado
-            HttpSession session = request.getSession(false);
-            String usuarioResponsable = "sistema";
-            if (session != null && session.getAttribute("usuarioLogueado") != null) {
-                Usuario usu = (Usuario) session.getAttribute("usuarioLogueado");
-                usuarioResponsable = usu.getCorreo();
-            }
-            
-            ProductoDAO dao = DAOFactory.crearProductoDAO();
-            boolean exito = dao.insertarProducto(p, usuarioResponsable);
-            
-            if (exito) {
-                request.setAttribute("mensaje", "Producto guardado correctamente");
-            } else {
-                request.setAttribute("error", "No se pudo guardar el producto");
-            }
-            
-        } catch (Exception e) {
-            request.setAttribute("error", "Error: " + e.getMessage());
-            e.printStackTrace();
+            request.setAttribute("error", "Nombre, precio y categoría son obligatorios");
+            doGet(request, response);
+            return;
         }
         
-        doGet(request, response);
+        double precio = Double.parseDouble(precioStr);
+        
+        // Procesar imagen (OPCIONAL)
+        byte[] imagenBytes = null;
+        try {
+            Part imagenPart = request.getPart("imagen");
+            if (imagenPart != null && imagenPart.getSize() > 0) {
+                System.out.println("Imagen recibida: " + imagenPart.getSize() + " bytes");
+                InputStream inputStream = imagenPart.getInputStream();
+                imagenBytes = inputStream.readAllBytes();
+            } else {
+                System.out.println("Sin imagen");
+            }
+        } catch (Exception e) {
+            System.out.println("Error leyendo imagen: " + e.getMessage());
+        }
+        
+        Producto p = new Producto();
+        p.setNombreProducto(nombre.trim());
+        p.setDescripcion(descripcion);
+        p.setPrecioVenta(precio);
+        p.setStock(0);
+        p.setEstadoStock(true);
+        p.setCategoria(categoria);
+        p.setImagen(imagenBytes); // Puede ser null
+        
+        // AUDITORIA
+        HttpSession session = request.getSession(false);
+        String usuarioResponsable = "sistema";
+        if (session != null && session.getAttribute("usuarioLogueado") != null) {
+            Usuario usu = (Usuario) session.getAttribute("usuarioLogueado");
+            usuarioResponsable = usu.getCorreo();
+        }
+        
+        ProductoDAO dao = DAOFactory.crearProductoDAO();
+        boolean exito = dao.insertarProducto(p, usuarioResponsable);
+        
+        if (exito) {
+            request.setAttribute("mensaje", "✅ Producto guardado correctamente");
+        } else {
+            request.setAttribute("error", "❌ No se pudo guardar el producto");
+        }
+        
+    } catch (Exception e) {
+        System.out.println("ERROR GENERAL: " + e.getMessage());
+        e.printStackTrace();
+        request.setAttribute("error", "❌ Error: " + e.getMessage());
     }
+    
+    doGet(request, response);
 }

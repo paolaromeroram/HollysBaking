@@ -104,29 +104,27 @@ public class ProductoDAO extends GenericDAO<Producto> {
     
     // Insertar con auditoria
     public boolean insertarProducto(Producto p, String usuarioResponsable) {
-    // INSERT sin las columnas de auditoría primero, para asegurar que funcione
     String sql = "INSERT INTO Productos (nombre_producto, descripcion, precio_venta, stock, estado_stock, categoria, imagen) " +
                  "VALUES (?, ?, ?, ?, ?, ?, ?)";
     
-    return ejecutarActualizacion(sql,
-        p.getNombreProducto(),
-        p.getDescripcion(),
-        p.getPrecioVenta(),
-        p.getStock(),
-        p.isEstadoStock(),
-        p.getCategoria(),
-        p.getImagen()
-    );
+    try {
+        boolean resultado = ejecutarActualizacion(sql,
+            p.getNombreProducto(),
+            p.getDescripcion(),
+            p.getPrecioVenta(),
+            p.getStock(),
+            p.isEstadoStock(),
+            p.getCategoria(),
+            p.getImagen()  // Puede ser null, PostgreSQL lo acepta
+        );
+        
+        System.out.println("Insert resultado: " + resultado);
+        return resultado;
+        
+    } catch (Exception e) {
+        System.out.println("Error en insertarProducto: " + e.getMessage());
+        e.printStackTrace();
+        return false;
+    }
 }
-    
-    // Sobrecarga para compatibilidad
-    public boolean insertarProducto(Producto p) {
-        return insertarProducto(p, "sistema");
-    }
-    
-    // Eliminar producto
-    public boolean eliminarProducto(int id) {
-        String sql = "DELETE FROM Productos WHERE id_producto = ?";
-        return ejecutarActualizacion(sql, id);
-    }
 }
