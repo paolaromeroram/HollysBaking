@@ -1,6 +1,6 @@
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
 <%@page import="java.util.List" %>
-<%@page import="modelo.entidades.Producto" %>
+<%@page import="Modelo.entidades.Producto" %>
 
 <%-- Si no hay lista, redirigir al servlet --%>
 <%

@@ -1,6 +1,6 @@
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
 <%@page import="java.util.List" %>
-<%@page import="modelo.entidades.Producto" %>
+<%@page import="Modelo.entidades.Producto" %>
 
 <!DOCTYPE html>
 <html lang="es">

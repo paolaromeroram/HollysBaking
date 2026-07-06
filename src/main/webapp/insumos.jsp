@@ -1,6 +1,6 @@
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
 <%@page import="java.util.List" %>
-<%@page import="modelo.entidades.Insumo" %>
+<%@page import="Modelo.entidades.Insumo" %>
 
 <%-- Validación de carga --%>
 <% if (request.getAttribute("listaInsumos") == null) { response.sendRedirect("InsumoServlet"); return; } %>
